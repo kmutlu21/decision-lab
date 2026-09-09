@@ -1,0 +1,10 @@
+[Unit]
+Description=Update Decision Lab DNS after boot and periodically
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=5min
+Unit=decision-lab-dns.service
+
+[Install]
+WantedBy=timers.target
