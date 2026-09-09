@@ -1,0 +1,44 @@
+# Isolated synthetic-data stack; does not use .env, models, or research data.
+name: decision-lab-ci
+services:
+  db:
+    image: postgres:18-bookworm
+    environment:
+      POSTGRES_DB: decision_lab_ci
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ci-only-disposable
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d decision_lab_ci"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  api:
+    image: decision-lab-api:ci
+    build: .
+    environment: &database
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: decision_lab_ci
+      PGUSER: postgres
+      PGPASSWORD: ci-only-disposable
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+  tests:
+    image: decision-lab-api:ci
+    environment:
+      <<: *database
+      API_URL: http://api:8000
+    profiles: ["tools"]
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./ci:/ci:ro
+    command: ["python", "/ci/smoke_test.py"]

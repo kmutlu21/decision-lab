@@ -1,0 +1,32 @@
+name: Container and API checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  container-api:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Validate Compose configuration
+        run: docker compose -f compose.ci.yaml config --quiet
+      - name: Build application image
+        run: docker compose -f compose.ci.yaml build api
+      - name: Check installed dependencies
+        run: docker run --rm decision-lab-api:ci python -m pip check
+      - name: Exercise API with synthetic PostgreSQL records
+        run: docker compose -f compose.ci.yaml run --rm tests
+      - name: Show service logs on failure
+        if: failure()
+        run: docker compose -f compose.ci.yaml logs --no-color --tail 100
+      - name: Remove disposable CI containers and volumes
+        if: always()
+        run: docker compose -f compose.ci.yaml down --volumes --remove-orphans
