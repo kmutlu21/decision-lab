@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+result="$(curl -4 --fail --silent --show-error \
+    --connect-timeout 10 --max-time 30 \
+    --get 'https://www.duckdns.org/update' \
+    --data-urlencode 'domains=function-optimization' \
+    --data-urlencode 'token@/etc/decision-lab/duckdns-token' \
+    --data-urlencode 'ip=')"
+
+if [ "$result" = "OK" ]; then
+    echo "Duck DNS update succeeded."
+else
+    echo "Duck DNS update failed." >&2
+    exit 1
+fi
