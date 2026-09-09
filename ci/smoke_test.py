@@ -62,7 +62,8 @@ def request(path):
         with urlopen(os.environ.get('API_URL', 'http://api:8000') + path, timeout=10) as response:
             return response.status, response.read().decode()
     except HTTPError as error:
-        return error.code, error.read().decode()
+        with error:
+            return error.code, error.read().decode()
 
 
 class ApiChecks(unittest.TestCase):
