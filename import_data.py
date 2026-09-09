@@ -13,6 +13,7 @@ import ast
 import getpass
 import json
 import math
+import os
 from pathlib import Path
 import re
 
@@ -151,7 +152,9 @@ def read_exports(root):
 
 def import_records(records, args):
     import psycopg
-    password = getpass.getpass(f'PostgreSQL password for {args.user}: ')
+    password = os.getenv('PGPASSWORD')
+    if password is None:
+        password = getpass.getpass(f'PostgreSQL password for {args.user}: ')
     # One transaction: either the entire import commits or none of it does.
     with psycopg.connect(host=args.host, port=args.port, dbname=args.database,
                          user=args.user, password=password, connect_timeout=10) as conn:

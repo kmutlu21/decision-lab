@@ -117,7 +117,7 @@ async function updateForecast(){
  const getPrediction=async n=>{if(n<1)return null;if(forecastCache.has(n))return forecastCache.get(n);const result=await get('/predict',{session_id:data.session_id,game_number:data.game_number,participant_id:data.participant_id,round_number:data.round_number,after_step:n},controller.signal);if(ticket===version)forecastCache.set(n,result);return result;};
  try{const [now,previous]=await Promise.all([getPrediction(step),getPrediction(step-1)]);if(ticket!==version||step!==shown)return;currentForecast=now;previousForecast=previous;forecastStep=step;
   if(!now.available)forecastMessage=now.reason;
-  else{forecastMessage=`Held-out fold ${now.held_out_fold} · After ${step} own samples · Original historical feature inputs.`;if(step<4)forecastMessage+=' Early-history prediction; the reported MAE begins after four own samples.';if(step===data.samples.length)forecastMessage+=' The record ends here, so there is no observed next sample to compare.';}
+  else{forecastMessage=`Held-out fold ${now.held_out_fold} · After ${step} own samples · Inputs rebuilt from PostgreSQL history.`;if(step<4)forecastMessage+=' Early-history prediction; the reported MAE begins after four own samples.';if(step===data.samples.length)forecastMessage+=' The record ends here, so there is no observed next sample to compare.';}
   render();
  }catch(e){if(e.name==='AbortError'||ticket!==version||step!==shown)return;forecastMessage=e.message;forecastStep=step;render();}
 }
