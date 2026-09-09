@@ -1,0 +1,70 @@
+name: decision-lab
+
+x-app: &app
+  image: decision-lab-api:local
+  build: .
+  environment:
+    PGHOST: db
+    PGPORT: "5432"
+    PGDATABASE: decision_lab
+    PGUSER: postgres
+    PGPASSWORD: ${DECISION_LAB_DB_PASSWORD:?Run setup_docker.py first}
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  db:
+    image: postgres:18-bookworm
+    environment:
+      POSTGRES_DB: decision_lab
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DECISION_LAB_DB_PASSWORD:?Run setup_docker.py first}
+    volumes:
+      # PostgreSQL 18 stores versioned data beneath this parent directory.
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d decision_lab"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  api:
+    <<: *app
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - type: bind
+        source: ./models
+        target: /app/models
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  init:
+    <<: *app
+    profiles: ["tools"]
+    command: ["python", "bootstrap_database.py"]
+    volumes:
+      - type: bind
+        source: ./data/raw
+        target: /app/data/raw
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./models
+        target: /app/models
+        read_only: true
+        bind:
+          create_host_path: false
+
+volumes:
+  postgres_data:
