@@ -4,7 +4,7 @@ Start with: python main.py
 Open: http://127.0.0.1:8000/docs
 The PostgreSQL password is prompted for and kept only in process memory.
 Optional DB settings: PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD.
-Historical replay with verified held-out LSTM inference on cached feature prefixes.
+Historical replay with held-out LSTM inference on PostgreSQL-built feature prefixes.
 """
 import getpass
 import os
@@ -21,8 +21,8 @@ from objectives import evaluate
 
 app = FastAPI(
     title='Decision Lab API',
-    version='0.4.0',
-    description='Explore historical decisions. Elapsed time starts at the first own sample, not the round start. Held-out LSTM predictions use verified historical feature prefixes.',
+    version='0.5.0',
+    description='Explore historical decisions. Elapsed time starts at the first own sample, not the round start. Held-out LSTM predictions use PostgreSQL-built feature prefixes.',
 )
 Session = Literal['feb18', 'feb20', 'march6']
 PositiveInt = Annotated[int, Query(ge=1)]
@@ -184,24 +184,25 @@ def landscape(session_id: Session, game_number: Game, round_number: PositiveInt,
 @app.get('/predict')
 def predict(session_id: Session, game_number: Game, participant_id: PositiveInt,
             round_number: PositiveInt, after_step: PositiveInt):
-    """Predict after an own sample using only its cached history prefix.
-
-    This is historical model inference, not a recommendation of an optimal
-    action. No future targets are returned. Short excluded rounds can still
-    be replayed but have no trained-model prediction.
-    """
-    observed = samples(session_id, game_number, participant_id, round_number, after_step)
-    if len(observed['samples']) != after_step:
-        raise HTTPException(status_code=422, detail='after_step exceeds the recorded sample count.')
+    """Build an observed event prefix from PostgreSQL and predict its next action."""
+    from sql_runtime import load_prefix, MissingRound, InvalidStep
     try:
+        with psycopg.connect(**DB_SETTINGS) as conn:
+            conn.isolation_level = psycopg.IsolationLevel.REPEATABLE_READ
+            conn.read_only = True
+            seq, meta = load_prefix(conn, (session_id,game_number,round_number,participant_id), after_step)
         from inference import get_predictor
-        return get_predictor().predict((session_id, game_number, round_number, participant_id), after_step, observed)
+        return get_predictor().predict((session_id,game_number,round_number,participant_id),after_step,seq,meta)
+    except MissingRound as exc:
+        raise HTTPException(status_code=404,detail=str(exc))
+    except InvalidStep as exc:
+        raise HTTPException(status_code=422,detail=str(exc))
     except FileNotFoundError:
-        raise HTTPException(status_code=503, detail='Model files missing. Check models/ contains the original weights and preprocessed sequences.')
+        raise HTTPException(status_code=503,detail='Missing original model weights or results in models/.')
     except ImportError:
-        raise HTTPException(status_code=503, detail='Model code or dependency missing. Check inference.py, verify_model.py and PyTorch.')
+        raise HTTPException(status_code=503,detail='Missing model/feature code or dependency. Check the update files.')
     except ValueError as exc:
-        raise HTTPException(status_code=409, detail=str(exc))
+        raise HTTPException(status_code=409,detail=str(exc))
 
 
 if __name__ == '__main__':
