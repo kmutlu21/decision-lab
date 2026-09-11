@@ -1,12 +1,10 @@
-# Decision Lab: testing under competition
+# Decision Lab: product testing under competition
 
 **by Kaan Mutlu**
 
 In product development, testing costs resources while competitors keep searching. Decision Lab turns a controlled experiment about that trade-off into an interactive, deployed machine-learning application.
 
 [Explore the live demo](https://function-optimization.duckdns.org) · [Technical guide](docs/ENGINEERING_GUIDE.md) · [File-by-file and line-by-line guide](docs/CODE_INDEX.md)
-
-The demo may be unavailable when its AWS instance is paused.
 
 ## Explore the experiment
 
@@ -36,25 +34,11 @@ flowchart TD
 
 The API reads database history and computes features in Python. It does not train a network per request or look up saved predictions. The preprocessing cache is used for import/verification, not live inference. The original results file is still loaded to obtain saved thresholds.
 
-## Evidence and its limits
-
-The original dataset contains 1,093 nonempty player-rounds. Of these, 1,086 have original held-out assignments; seven one-sample rounds remain available for replay.
-
-| Check | Reported result | Meaning |
-|---|---|---|
-| Full SQL reconstruction | 1,086 sequences; maximum model-output difference 0 | SQL-derived inputs preserved original model behavior |
-| Request-time SQL prefix check | 36 prefixes across 12 session/game combinations; maximum difference 0 | Representative live prefix logic matched the reference |
-| Original next-position error | 10.40 percentage points of domain width | MAE for forecasts made after at least four own tests, not the UI's first test-4 comparison |
-| Competition replay check | 12 session/game combinations passed locally | Own history, permitted sharing, ordering and budgets matched |
-| CI | Container and API checks passed | Synthetic HTTP checks, not model or browser validation |
-
-These are previously reported verification results, not newly measured by this documentation update. Reproducing saved outputs establishes implementation consistency, not a new independent estimate of predictive accuracy. The replay verifier was distributed with the UI update but is not included in this source snapshot.
-
 ## Model interpretation
 
 The LSTM predicts a next-position delta, an auxiliary next-value delta and a stop logit. The deployed API retains all heads; the UI draws only x and displays the sigmoid stopping score and thresholded action. Stopping combines submission and timeout.
 
-This is historical held-out behavioral prediction. The attempted success-conditioned decision-support model is not the deployed artifact, and this application does not establish that following its predictions improves outcomes.
+This is historical held-out behavioral prediction.
 
 - Original fold assignments are preserved, not reconstructed here. Training and fold-construction scripts are outside this repository.
 - Saved stopping thresholds were selected from out-of-fold predictions. Scores evaluated on those same threshold-selection observations are not independent test estimates.
