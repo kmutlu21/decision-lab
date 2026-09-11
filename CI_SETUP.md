@@ -1,3 +1,5 @@
+> **Scope notice:** Historical CI installation note. The workflow is already installed. Do not repeat the Copy/install steps on the current deployment. Use the current engineering guide for coverage; this snapshot does not test the competition endpoints or trained model in CI.
+
 # GitHub Actions: container and API checks
 
 Copy .github/, ci/, and compose.ci.yaml into the existing project root. No changes to requirements.txt or Dockerfile are needed. These files depend on the Docker setup and SQL API files already developed on feature/sql-model-inputs.
@@ -30,3 +32,4 @@ Always include -f compose.ci.yaml for these commands. This separate stack has no
 ## Validation status
 
 Python syntax and Compose/workflow YAML structure were checked before delivery. The CI integration run must still execute on your Docker host or GitHub runner; a passing build alone does not establish that these tests pass. Dependencies are retained exactly as supplied in your successfully built requirements.txt. The first GitHub run verifies availability and installation in a clean runner.
+

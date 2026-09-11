@@ -1,3 +1,5 @@
+> **Scope notice:** Historical Docker setup note. The deployed service is already initialized and verified. For documentation-only changes, no rebuild or import is needed. Its copy/replace instructions describe an older update package.
+
 # Run Decision Lab with Docker
 
 Copy this package into the existing project root, replacing import_data.py. It adds environment-based password support while retaining the interactive password prompt for local use. Keep existing source files, requirements.txt, data/raw, and models.
@@ -46,3 +48,4 @@ docker compose up -d api
 After source changes, rebuild with docker compose build api, then recreate the API with docker compose up -d api. Data persists in the named PostgreSQL volume when containers stop.
 
 This package has been checked for Python syntax and compatibility with the supplied source interfaces. Image building and container integration still need to be verified on your computer.
+

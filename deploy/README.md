@@ -1,4 +1,6 @@
-﻿# AWS deployment
+> **Scope notice:** Existing host operations guide. The configuration commands describe installed services outside the repository. Source-only review cannot verify their current live state; deployment validation below records prior checks.
+
+# AWS deployment
 
 Live application: https://function-optimization.duckdns.org
 
@@ -96,3 +98,4 @@ On the server:
 
 If SSH no longer connects after restarting EC2, use its current
 public IPv4 address from the AWS console.
+

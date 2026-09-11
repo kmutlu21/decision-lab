@@ -1,138 +1,87 @@
-# Function Optimization Game
-### Interactive replay of human decisions with LSTM predictions
+# Decision Lab: testing under competition
 
-How do people search for the best solution when they have limited time,
-limited information, and competitors?
+**by Kaan Mutlu**
 
-This application replays decisions from a behavioral experiment in which
-participants sampled locations on an unknown mathematical landscape to
-find a high-value point. Visitors can follow a participant's search,
-reveal the underlying landscape, and compare recorded behavior with
-predictions from a trained LSTM neural network.
+In product development, testing costs resources while competitors keep searching. Decision Lab turns a controlled experiment about that trade-off into an interactive, deployed machine-learning application.
 
-**[Explore the live demo](https://function-optimization.duckdns.org)**
+[Explore the live demo](https://function-optimization.duckdns.org) · [Technical guide](docs/ENGINEERING_GUIDE.md) · [File-by-file and line-by-line guide](docs/CODE_INDEX.md)
 
-The AWS instance may be paused to conserve hosting credits.
-The demo is unavailable while it is paused.
+The demo may be unavailable when its AWS instance is paused.
 
-## Try the demo
+## Explore the experiment
 
-1. Select a session, game, participant, and round.
-2. Advance through the participant's recorded samples.
-3. Reveal the landscape to see where better solutions were available.
-4. Inspect the model's next-sample predictions and stop/continue classification.
+Choose a session, information-sharing scenario, player and round. Follow own and permitted teammate tests, track the competitor benchmark, and reveal the hidden objective curve. After three own tests, enable model comparison: the first x prediction appears alongside actual test 4, using only the preceding model prefix. At the end, inspect both teams' recorded outcomes and token spending.
 
-Positions and observed values are normalized by default so that rounds
-with different search ranges and objective functions are easier to compare.
-Original units are also available.
+The four scenarios expose own tests only, teammate tests, competitor scores, or both. The company examples on the page are analogies, not the source of the data.
 
-## What I built
+## Engineering contribution
 
-I extended my experimental modeling work into a deployed application:
-
-- Imported CSV and Excel records into PostgreSQL with checks that prevent
-  duplicate imports and reject conflicting records.
-- Rebuilt the model's 14 input features from database history at request time.
-- Connected five trained PyTorch LSTM fold models to a FastAPI service.
-- Built an interactive historical replay interface.
-- Containerized the API and PostgreSQL with Docker Compose.
-- Added GitHub Actions checks that build the application and exercise the
-  API against synthetic PostgreSQL records.
-- Deployed the application on AWS EC2 with Caddy-managed HTTPS.
-- Configured automatic container restart and dynamic DNS updates, then
-  verified recovery after stopping and restarting EC2.
-
-## Architecture
+- Validated CSV/Excel ingestion into PostgreSQL with transactions, duplicate detection and conflict rejection.
+- Reconstruction of the original 14 model features from SQL-selected historical prefixes at request time.
+- CPU PyTorch inference using the original five held-out fold checkpoints and saved per-scenario stopping thresholds.
+- FastAPI endpoints and a framework-free SVG replay with chronological sharing, matched prediction errors and team results.
+- Docker Compose deployment on AWS EC2, Caddy HTTPS and scheduled Duck DNS updates.
+- GitHub Actions image/dependency checks and synthetic PostgreSQL/HTTP integration tests.
 
 ```mermaid
 flowchart TD
-    Browser[Browser] --> Caddy[Caddy: HTTPS]
+    Browser[Browser replay] --> Caddy[Caddy HTTPS]
     Caddy --> API[FastAPI]
-    API --> DB[(PostgreSQL)]
-    API --> Model[PyTorch LSTM]
-    Import[Validated data import] --> DB
+    API --> SQL[(PostgreSQL history)]
+    SQL --> Features[Python feature construction]
+    Features --> Model[Assigned PyTorch fold]
+    Model --> API
+    Imports[Validated imports] --> SQL
 ```
 
-FastAPI reconstructs the selected history from PostgreSQL and sends
-the resulting features to the assigned held-out model. Runtime inference
-does not read the original preprocessed sequence cache.
+The API reads database history and computes features in Python. It does not train a network per request or look up saved predictions. The preprocessing cache is used for import/verification, not live inference. The original results file is still loaded to obtain saved thresholds.
 
-The API and database run in Docker containers on one EC2 instance.
-Caddy forwards public HTTPS requests to the locally bound API.
-PostgreSQL has no published host port.
+## Evidence and its limits
 
-## Data and predictions
+The original dataset contains 1,093 nonempty player-rounds. Of these, 1,086 have original held-out assignments; seven one-sample rounds remain available for replay.
 
-The imported dataset contains **1,093 nonempty participant-round records**
-from three experimental sessions and four game conditions.
-**1,086 sequences** have assignments to the original five model folds;
-seven one-sample rounds remain available for replay but lack model assignments.
+| Check | Reported result | Meaning |
+|---|---|---|
+| Full SQL reconstruction | 1,086 sequences; maximum model-output difference 0 | SQL-derived inputs preserved original model behavior |
+| Request-time SQL prefix check | 36 prefixes across 12 session/game combinations; maximum difference 0 | Representative live prefix logic matched the reference |
+| Original next-position error | 10.40 percentage points of domain width | MAE for forecasts made after at least four own tests, not the UI's first test-4 comparison |
+| Competition replay check | 12 session/game combinations passed locally | Own history, permitted sharing, ordering and budgets matched |
+| CI | Container and API checks passed | Synthetic HTTP checks, not model or browser validation |
 
-The conditions vary information sharing and access to opponent information.
-Objective functions and search ranges differ across sessions, and function
-parameters vary across rounds.
+These are previously reported verification results, not newly measured by this documentation update. Reproducing saved outputs establishes implementation consistency, not a new independent estimate of predictive accuracy. The replay verifier was distributed with the UI update but is not included in this source snapshot.
 
-At a selected step, the model predicts:
+## Model interpretation
 
-- The next sampled position.
-- The next observed value.
-- A stopping probability, converted into a stop/continue classification
-  using the original game-specific thresholds.
+The LSTM predicts a next-position delta, an auxiliary next-value delta and a stop logit. The deployed API retains all heads; the UI draws only x and displays the sigmoid stopping score and thresholded action. Stopping combines submission and timeout.
 
-These are predictions of recorded behavior, not recommendations for an
-optimal decision.
+This is historical held-out behavioral prediction. The attempted success-conditioned decision-support model is not the deployed artifact, and this application does not establish that following its predictions improves outcomes.
 
-## Validation
+- Original fold assignments are preserved, not reconstructed here. Training and fold-construction scripts are outside this repository.
+- Saved stopping thresholds were selected from out-of-fold predictions. Scores evaluated on those same threshold-selection observations are not independent test estimates.
+- Stopping scores are not established as calibrated probabilities.
+- Performance normalization uses the full round's estimated objective maximum, an analyst quantity participants may not know.
+- Model time starts at the first visible own/teammate event; display time starts at the first own test. Neither is actual round-start time.
+- The preserved opponent-context availability rule depends on a nonempty stored timeline, even before its first score.
+- There is no new-data feed, automated retraining, model-drift monitoring or automated AWS deployment in this repository.
 
-| Check | Result |
-|---|---|
-| Full SQL feature and model-output comparison with the original reference | Matched across all 1,086 model sequences; maximum model-output difference 0 |
-| Request-time SQL prefix verification on AWS | 36 prefixes across 12 session/game combinations; maximum prediction difference 0 |
-| Next-position MAE after at least four own samples | 10.40 percentage points of the normalized search range |
-| Container/API CI | Passed using synthetic PostgreSQL records |
-| EC2 stop/start recovery | Containers restarted, DNS updated, and HTTPS health check succeeded |
+## Run and maintain
 
-Reproducing saved predictions verifies implementation consistency.
-It does not provide a new, independent estimate of model accuracy.
+A full demo requires authorized raw exports and the original private model artifacts. They are deliberately excluded from Git and the Docker build context. The [engineering guide](docs/ENGINEERING_GUIDE.md) explains setup, runtime dependencies and validation. The [deployment guide](deploy/README.md) describes the existing host configuration.
 
-## Interpretation and limitations
+For readers without private artifacts, the synthetic CI stack exercises the public API plumbing:
 
-- **Historical replay:** inference uses each sequence's original held-out
-  fold assignment. This is not a general prediction service for arbitrary
-  new participants, and it does not establish performance on unseen people.
-- **Stopping behavior:** a sequence can end through submission or timeout.
-  The stop prediction does not distinguish voluntary stopping from a
-  deadline ending the round.
-- **Threshold selection:** stop/continue thresholds were selected by
-  maximizing F1 on validation predictions. Performance measured on those
-  same predictions is not an independent test result.
-- **Analyst perspective:** quality normalization uses the estimated maximum
-  of the full objective function, which participants may not have known.
-- **Time reference:** the replay shows time since the participant's first
-  recorded sample, not time since the round began.
-- **Shared information:** the graph shows the participant's own samples.
-  Model inputs also incorporate the applicable historical context.
-- **Preserved preprocessing:** the implementation retains the original
-  opponent-context availability rule, which depends on whether the stored
-  opponent timeline is nonempty.
-- **Fixed dataset:** no new experimental observations arrive. Infrastructure
-  health checks do not constitute ongoing model-quality or drift monitoring.
-- **Private artifacts:** raw research data, trained models, and credentials
-  are not included in this repository.
+```bash
+docker compose -f compose.ci.yaml build api
+docker compose -f compose.ci.yaml run --rm tests
+docker compose -f compose.ci.yaml down --volumes --remove-orphans
+```
 
-The sigmoid stopping output has not been established as a calibrated
-probability. Predicted position and value are separate outputs and need
-not lie exactly on the objective curve.
+Use that cleanup only with the explicit CI configuration. The production PostgreSQL volume holds the research database.
 
-## Running and deployment
+## Documentation
 
-See [deployment instructions](deploy/README.md) for architecture,
-private prerequisites, validation, troubleshooting, and pause/resume.
+Start with [ENGINEERING_GUIDE.md](docs/ENGINEERING_GUIDE.md), then use [CODE_INDEX.md](docs/CODE_INDEX.md) to open any source file's annotated guide. Each original physical line has an explanation and a numbered source listing. Line numbers refer to source commit `d0afd0c367f72354259d0661a76a0119fb4ed8b2`.
 
-A full local deployment requires authorized data and model artifacts.
-GitHub Actions uses synthetic records to check the container and API
-without those private artifacts.
+[Review notes](docs/REVIEW_NOTES.md) distinguish implementation caveats, stale comments and possible future improvements. Legacy setup/migration documents remain available for history, with notices explaining their scope. Application source, model weights and database records are unchanged by this documentation update.
 
-The [v0.5 SQL migration note](docs/sql-inference-migration-v0.5.md)
-is retained for implementation history. Its upgrade instructions describe
-an earlier development stage and are not the current setup guide.
+The [final wording update](docs/FINAL_COPY_UPDATE.md) records the proposed copy-only changes to replay.html after the documented source snapshot.
