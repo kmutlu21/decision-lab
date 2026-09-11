@@ -205,6 +205,12 @@ def predict(session_id: Session, game_number: Game, participant_id: PositiveInt,
         raise HTTPException(status_code=409,detail=str(exc))
 
 
+
+
+# Decision Lab competition replay routes
+from replay_story import register_replay_routes
+register_replay_routes(app, fetch, get_function)
+
 if __name__ == '__main__':
     if DB_SETTINGS['password'] is None:
         DB_SETTINGS['password'] = getpass.getpass(f"PostgreSQL password for {DB_SETTINGS['user']}: ")
