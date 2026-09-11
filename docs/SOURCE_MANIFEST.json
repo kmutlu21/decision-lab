@@ -1,0 +1,171 @@
+{
+  "source_commit": "d0afd0c367f72354259d0661a76a0119fb4ed8b2",
+  "source_archive_sha256": "66b821701fc560f317cc84b2b6bc48b941fe086450c34656f344ab3611a037a4",
+  "files": [
+    {
+      "path": ".dockerignore",
+      "sha256": "1340429170d31375f40e9d46a287de944a015d0afe67da7af37cb7b6efe04654",
+      "lines": 16
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "668ba528b3b00856c597263b46e26b73c7a8e901ffc0ee7139b57b08d590d995",
+      "lines": 32
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "5ccda52376b5d29bc841e2b439f97d7b59415dbda4c9e609c3053fc79c272d22",
+      "lines": 20
+    },
+    {
+      "path": "CI_SETUP.md",
+      "sha256": "9e5abc60f9a05f0d1739fc5e8992f6dc0d68510dc56ca2e01601ea7cee2dddd1",
+      "lines": 32
+    },
+    {
+      "path": "DOCKER_SETUP.md",
+      "sha256": "9a6c2bd4a2b9ee874731c0452184fc443e333f64eb30ae4f936f8e6026c97408",
+      "lines": 48
+    },
+    {
+      "path": "Dockerfile",
+      "sha256": "76b6d06c31ce5be47b8eef48e374530217b7afc4a4309a4047bffa59564a3573",
+      "lines": 22
+    },
+    {
+      "path": "README.md",
+      "sha256": "d2b44b1a48d3a896325b96876078ac4077727d9cdd8d5ea1154b57e5f7f623a2",
+      "lines": 138
+    },
+    {
+      "path": "bootstrap_database.py",
+      "sha256": "8286e041040e1556cf0735db99af5f79d5c2113efeda161d26b5d9412da62528",
+      "lines": 19
+    },
+    {
+      "path": "ci/smoke_test.py",
+      "sha256": "9aebf1364f943f1eb904ee5594f77fe49cfd99bbcaa9f9535bb45b35726f133e",
+      "lines": 124
+    },
+    {
+      "path": "compose.ci.yaml",
+      "sha256": "f7eacf9be49351ee7958b3e9b4769861329c6cdf570c5db45382152ffd8bd9e9",
+      "lines": 44
+    },
+    {
+      "path": "compose.yaml",
+      "sha256": "3aae7ce2fbb54588739baff709ee1064904171202d66575cd84c10c7c2aff2bc",
+      "lines": 72
+    },
+    {
+      "path": "deploy/Caddyfile",
+      "sha256": "d36589f256bc75666ee212f8aa668ecab000b4084e3bf18ebe09552349ffb85c",
+      "lines": 3
+    },
+    {
+      "path": "deploy/README.md",
+      "sha256": "055a984dec385e15d5c016f212c2b9e12d75e71a4948e1e3aa45aa76bf24a926",
+      "lines": 98
+    },
+    {
+      "path": "deploy/decision-lab-dns.service",
+      "sha256": "3800caf5589edc2d92760f836eb2ff84db076d642faa336ccd9cd44a0daf7825",
+      "lines": 8
+    },
+    {
+      "path": "deploy/decision-lab-dns.timer",
+      "sha256": "1cd1bee08885f6b1ff415808e51330f05fec8c448c230f73a55720af58332fba",
+      "lines": 10
+    },
+    {
+      "path": "deploy/decision-lab-update-dns",
+      "sha256": "6ffd5e1755682558aa7f6eb38a173a8dbe2c7e4aa7af098df869259a64155657",
+      "lines": 16
+    },
+    {
+      "path": "docs/sql-inference-migration-v0.5.md",
+      "sha256": "0152e83370dbf93b20683941538f291cc565b7d30d05651c2c4f45ed9dae652c",
+      "lines": 63
+    },
+    {
+      "path": "feature_math.py",
+      "sha256": "d5be2d70e096ef67c8c41383ae47f8cc32988de9ea202f95d6beb51060bbdcff",
+      "lines": 258
+    },
+    {
+      "path": "import_data.py",
+      "sha256": "fdaa9bb9b00d9eb6f3508cac117f1533252428b828cb436146804845a668fd96",
+      "lines": 219
+    },
+    {
+      "path": "import_functions.py",
+      "sha256": "46c10f8ff54f18b46a07f5b3d2c4177c43ca56ddd8ace9c7a0d94ada6f85c756",
+      "lines": 103
+    },
+    {
+      "path": "import_model_context.py",
+      "sha256": "c4fa2fcbdc9b5bae5a6962b4fbeb35635060d2f7ef86a8285d58e422dc319004",
+      "lines": 96
+    },
+    {
+      "path": "inference.py",
+      "sha256": "e2bdf1785d99da6bfa687e42140887c8d3b82efe21397dcf56580efa0755bd0f",
+      "lines": 81
+    },
+    {
+      "path": "main.py",
+      "sha256": "1915d648e26cf7b8b7455fac85bf0f673edba699afb5af337f90e67858c54566",
+      "lines": 222
+    },
+    {
+      "path": "objectives.py",
+      "sha256": "6bc27bab8f760e905a5aedd7ccc86f5ea9afb7f5b495f34b4677eb868029a037",
+      "lines": 26
+    },
+    {
+      "path": "replay.html",
+      "sha256": "498e78ab9a153cb911e1610e35c1e170e57219a8d30a872433527993065fc9ae",
+      "lines": 199
+    },
+    {
+      "path": "replay_story.py",
+      "sha256": "5f179147a7b39200b4f94db9223dcad12bc97a17883b53716cc8b9bdcbea1051",
+      "lines": 126
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "32ee14ab1d63bd47fe2df94e3dde9634ed835d2857184d619cd2fbc5971cc087",
+      "lines": 32
+    },
+    {
+      "path": "setup_docker.py",
+      "sha256": "1341acc11370a32a776eb76c211912b266f073c4da891f406539695f9e34af54",
+      "lines": 28
+    },
+    {
+      "path": "sql_features.py",
+      "sha256": "2165574047d0f91c3c802e6a773c58f16d41374b3f56b132209c26d0e1ec9695",
+      "lines": 62
+    },
+    {
+      "path": "sql_runtime.py",
+      "sha256": "bdb7c724c1fd19eb97a976a78c40d1abfc0e08749987df862d63d2e90098074d",
+      "lines": 80
+    },
+    {
+      "path": "verify_model.py",
+      "sha256": "a2e83bed7901eb176f1d314673f0dd43bb98322943f68abfb90727d272623dcd",
+      "lines": 160
+    },
+    {
+      "path": "verify_sql_features.py",
+      "sha256": "99b742f9c3161198ac13ae34fa381430fac2017f03e128e01812ea5b12d095f4",
+      "lines": 66
+    },
+    {
+      "path": "verify_sql_runtime.py",
+      "sha256": "2c4c5fddf4043fc184fb74b054be9dd8b22705cb475eba2bcdb04892c86b717e",
+      "lines": 48
+    }
+  ]
+}

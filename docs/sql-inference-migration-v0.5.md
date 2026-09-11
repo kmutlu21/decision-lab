@@ -1,3 +1,5 @@
+> **Scope notice:** Historical migration note. PostgreSQL-built inference is already deployed. Do not follow the file replacement/restart steps again merely to install this documentation.
+
 # Decision Lab: PostgreSQL inference API (v0.5)
 
 Requires the successful verify_sql_features.py result from the previous update.
@@ -61,3 +63,4 @@ predicted coordinates, stop probabilities, and stop/continue decisions.
 Use the original cached reference only for verification; do not delete it.
 If a comparison fails, retain the output and do not restart the new API yet.
 Your committed main branch preserves the working earlier application.
+
